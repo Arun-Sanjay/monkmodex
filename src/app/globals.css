@@ -1,26 +1,132 @@
 @import "tailwindcss";
 
+/* ==========================================
+   MMX DESIGN TOKENS
+   ========================================== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Backgrounds — warm layered blacks */
+  --bg-canvas: #0a0a0c;
+  --bg-surface: #141417;
+  --bg-elevated: #1c1c20;
+  --bg-inset: #06060a;
+
+  /* Text — warm off-whites, never pure */
+  --text-primary: #f5f4f1;
+  --text-secondary: #9a978f;
+  --text-tertiary: #5c5a55;
+  --text-inverse: #0a0a0c;
+
+  /* Accent — deep oxblood */
+  --accent-base: #7a1f24;
+  --accent-hover: #8e2530;
+  --accent-muted: #3a1416;
+  --accent-glow: rgba(122, 31, 36, 0.13);
+
+  /* Borders */
+  --border-subtle: #2a2a2e;
+  --border-default: #34343a;
+  --border-strong: #4a4a52;
+
+  /* States — restrained, never bright */
+  --state-success: #7a8870;
+  --state-warning: #a08040;
+  --state-danger: #8e2530;
+
+  /* Shadows — almost imperceptible in dark mode */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg-canvas: var(--bg-canvas);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-inset: var(--bg-inset);
+
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-inverse: var(--text-inverse);
+
+  --color-accent: var(--accent-base);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-muted: var(--accent-muted);
+
+  --color-border-subtle: var(--border-subtle);
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+
+  --color-state-success: var(--state-success);
+  --color-state-warning: var(--state-warning);
+  --color-state-danger: var(--state-danger);
+
+  --font-serif: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg-canvas);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  font-weight: 400;
+}
+
+::selection {
+  background: var(--accent-muted);
+  color: var(--text-primary);
+}
+
+/* Custom scrollbar — subtle */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-canvas);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-default);
+}
+
+/* Focus ring — oxblood, accessible */
+:focus-visible {
+  outline: 2px solid var(--accent-base);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Disable text size adjust on mobile rotation */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Reduced motion — respect user preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
