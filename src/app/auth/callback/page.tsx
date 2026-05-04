@@ -3,7 +3,7 @@ import { CallbackHandler } from "@/components/auth/CallbackHandler";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
-  title: "Signing you in — Monk ModeX",
+  title: "Signing you in",
   robots: { index: false, follow: false },
 };
 

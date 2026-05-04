@@ -16,6 +16,8 @@ import { dayNumber, todayDateString } from "@/lib/date";
 import { cn } from "@/lib/cn";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Foundation", robots: { index: false, follow: false } };
+
 
 const TIME_ORDER = ["morning", "midday", "evening", "night"] as const;
 const TIME_META = {

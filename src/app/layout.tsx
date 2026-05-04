@@ -26,14 +26,36 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Monk ModeX — The evidence-based version of monk mode",
+  title: {
+    default: "Monk ModeX — The evidence-based version of monk mode",
+    template: "%s — Monk ModeX",
+  },
   description:
-    "Built on 40 years of addiction research. Personalized to you in 90 seconds.",
+    "Built on 40 years of addiction research. Personalized to you in 90 seconds. No subscription, no streaks, no shame.",
   applicationName: "Monk ModeX",
   authors: [{ name: "Monk ModeX" }],
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+    process.env.NEXT_PUBLIC_APP_URL ?? "https://monkmodex.com"
   ),
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Monk ModeX — The evidence-based version of monk mode",
+    description:
+      "Built on 40 years of addiction research. Personalized to you in 90 seconds.",
+    type: "website",
+    siteName: "Monk ModeX",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Monk ModeX — The evidence-based version of monk mode",
+    description:
+      "Built on 40 years of addiction research. Personalized to you in 90 seconds.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

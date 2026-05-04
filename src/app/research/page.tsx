@@ -5,7 +5,7 @@ import { Display, Body, Meta } from "@/components/shared/Type";
 import { ARTICLES } from "@/content/research";
 
 export const metadata = {
-  title: "Bullshit Detector — Monk ModeX",
+  title: "Bullshit Detector",
   description:
     "Evidence-based rebuttals to popular self-improvement claims. The receipts behind the protocol.",
 };

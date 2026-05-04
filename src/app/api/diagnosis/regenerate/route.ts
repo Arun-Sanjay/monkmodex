@@ -13,6 +13,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { resolveOwner } from "@/services/owner";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { scoreQuiz } from "@/lib/quiz/scoring";
 import {
   getQuizResponseById,
@@ -39,6 +40,26 @@ export async function POST(req: Request) {
   const parsed = RequestSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  }
+
+  const ip = clientIp(req);
+  const rl = await rateLimit({
+    key: `diag-regen:ip:${ip}`,
+    max: 3,
+    windowSec: 3600,
+  });
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: "Too many regenerations. Try again in an hour." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(
+            Math.ceil((rl.resetAt.getTime() - Date.now()) / 1000)
+          ),
+        },
+      }
+    );
   }
 
   const owner = await resolveOwner();

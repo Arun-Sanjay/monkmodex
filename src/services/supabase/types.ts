@@ -137,6 +137,18 @@ export type CheckinInsert = {
 
 export type CheckinUpdate = Partial<CheckinInsert>;
 
+export type RateLimitBucketRow = {
+  bucket_key: string;
+  count: number;
+  window_start: string;
+};
+export type RateLimitBucketInsert = {
+  bucket_key: string;
+  count: number;
+  window_start?: string;
+};
+export type RateLimitBucketUpdate = Partial<RateLimitBucketInsert>;
+
 export type Database = {
   __InternalSupabase: { PostgrestVersion: "12" };
   public: {
@@ -157,6 +169,12 @@ export type Database = {
         Row: CheckinRow;
         Insert: CheckinInsert;
         Update: CheckinUpdate;
+        Relationships: [];
+      };
+      rate_limit_buckets: {
+        Row: RateLimitBucketRow;
+        Insert: RateLimitBucketInsert;
+        Update: RateLimitBucketUpdate;
         Relationships: [];
       };
     };

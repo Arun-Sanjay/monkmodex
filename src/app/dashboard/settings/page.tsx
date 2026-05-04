@@ -15,6 +15,8 @@ import { Panel } from "@/components/dashboard/Panel";
 import { formatShortDate } from "@/lib/date";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Settings", robots: { index: false, follow: false } };
+
 
 export default async function SettingsPage() {
   const owner = await resolveOwner();

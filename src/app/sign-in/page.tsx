@@ -5,7 +5,7 @@ import { SignInForm } from "@/components/auth/SignInForm";
 import { getAuthUser } from "@/services/supabase/auth-server";
 
 export const metadata = {
-  title: "Sign in — Monk ModeX",
+  title: "Sign in",
   description:
     "Sign in to save your protocol and pick up where you left off on any device.",
 };

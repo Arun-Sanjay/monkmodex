@@ -19,6 +19,7 @@ import { resolveOrCreateOwner } from "@/services/owner";
 import { scoreQuiz } from "@/lib/quiz/scoring";
 import { insertQuizResponse, setDiagnosisData } from "@/services/supabase/queries";
 import { generateDiagnosisData } from "@/services/anthropic/generate-diagnosis";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -40,6 +41,27 @@ export async function POST(req: Request) {
     return NextResponse.json(
       { error: "Invalid request shape" },
       { status: 400 }
+    );
+  }
+
+  // Rate limit: AI calls are expensive. 3 per IP per day caps a $5K
+  // accident at ~$1 even under aggressive abuse.
+  const ip = clientIp(req);
+  const rl = await rateLimit({
+    key: `diag:ip:${ip}`,
+    max: 3,
+    windowSec: 86400,
+  });
+  if (!rl.ok) {
+    return NextResponse.json(
+      {
+        error:
+          "Diagnostic limit reached for this device. Try again tomorrow, or sign in if you've already taken it.",
+      },
+      {
+        status: 429,
+        headers: { "Retry-After": String(Math.ceil((rl.resetAt.getTime() - Date.now()) / 1000)) },
+      }
     );
   }
 

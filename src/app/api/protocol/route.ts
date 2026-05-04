@@ -22,6 +22,7 @@ import {
   getProtocolByQuizResponseId,
 } from "@/services/supabase/queries";
 import { TIER_DURATION_DAYS } from "@/lib/constants";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 import type { QuizResponses } from "@/lib/quiz/schema";
 
 export const runtime = "nodejs";
@@ -49,6 +50,31 @@ export async function POST(req: Request) {
   }
 
   const { responseId, tier } = parsed.data;
+
+  // Rate limit: 5 protocol generations per IP per day. With idempotency
+  // already enforced per-response, this caps abuse via fresh quizzes.
+  const ip = clientIp(req);
+  const rl = await rateLimit({
+    key: `proto:ip:${ip}`,
+    max: 5,
+    windowSec: 86400,
+  });
+  if (!rl.ok) {
+    return NextResponse.json(
+      {
+        error:
+          "Protocol generation limit reached for this device. Try again tomorrow.",
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(
+            Math.ceil((rl.resetAt.getTime() - Date.now()) / 1000)
+          ),
+        },
+      }
+    );
+  }
 
   const sessionToken = await getSessionToken();
   if (!sessionToken) {

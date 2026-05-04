@@ -20,6 +20,8 @@ import { parseProtocolData } from "@/lib/protocol/extract";
 import { dayNumber, todayDateString, formatShortDate } from "@/lib/date";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Today", robots: { index: false, follow: false } };
+
 
 export default async function DashboardTodayPage() {
   const owner = await resolveOwner();

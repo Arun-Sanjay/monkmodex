@@ -12,7 +12,7 @@ import {
 } from "@/services/supabase/queries";
 
 export const metadata = {
-  title: "Save your protocol — Monk ModeX",
+  title: "Save your protocol",
 };
 export const dynamic = "force-dynamic";
 

@@ -14,6 +14,8 @@ import { parseProtocolData } from "@/lib/protocol/extract";
 import { dayNumber, todayDateString } from "@/lib/date";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Cuts", robots: { index: false, follow: false } };
+
 
 export default async function CutsPage() {
   const owner = await resolveOwner();

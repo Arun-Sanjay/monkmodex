@@ -14,6 +14,8 @@ import { CalendarView } from "@/components/dashboard/CalendarView";
 import { parseProtocolData } from "@/lib/protocol/extract";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Calendar", robots: { index: false, follow: false } };
+
 
 export default async function CalendarPage() {
   const owner = await resolveOwner();

@@ -25,6 +25,12 @@ export function PublicLayout({
             <Link href="/research" className="hover:text-[var(--text-primary)]">
               Research
             </Link>
+            <Link
+              href="/medical-disclaimer"
+              className="hover:text-[var(--text-primary)]"
+            >
+              Medical disclaimer
+            </Link>
             <Link href="/terms" className="hover:text-[var(--text-primary)]">
               Terms
             </Link>
@@ -32,7 +38,7 @@ export function PublicLayout({
               Privacy
             </Link>
             <Link href="/refund" className="hover:text-[var(--text-primary)]">
-              Refund policy
+              Refund
             </Link>
           </nav>
         </div>

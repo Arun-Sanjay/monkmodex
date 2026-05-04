@@ -14,6 +14,8 @@ import { Section } from "@/components/dashboard/Section";
 import { JournalEditor } from "@/components/dashboard/JournalEditor";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Journal", robots: { index: false, follow: false } };
+
 
 export default async function JournalPage() {
   const owner = await resolveOwner();

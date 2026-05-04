@@ -20,6 +20,8 @@ import { cn } from "@/lib/cn";
 import { cutSlug } from "@/components/dashboard/CutsStrip";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Overview", robots: { index: false, follow: false } };
+
 
 export default async function OverviewPage() {
   const owner = await resolveOwner();

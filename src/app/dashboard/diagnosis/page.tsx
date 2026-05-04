@@ -12,6 +12,8 @@ import { IdentityHeader } from "@/components/dashboard/IdentityHeader";
 import { DiagnosisDocument } from "@/components/dashboard/DiagnosisDocument";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Diagnosis", robots: { index: false, follow: false } };
+
 
 export default async function DiagnosisPage() {
   const owner = await resolveOwner();
