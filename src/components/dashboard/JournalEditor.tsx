@@ -146,6 +146,16 @@ export function JournalEditor({
     setDrawerOpen(false);
   }, [selectedDate]);
 
+  // Esc closes the drawer
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setDrawerOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [drawerOpen]);
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-5 lg:gap-7 items-start">
       {/* Mobile-only entry list trigger */}

@@ -85,7 +85,15 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         </nav>
       </aside>
 
-      <main className="flex-1 pb-24 md:pb-12">{children}</main>
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-[6px] focus:bg-[var(--accent-base)] focus:text-[var(--text-primary)] focus:font-mono focus:text-[0.6875rem] focus:tracking-[0.18em] focus:uppercase"
+      >
+        Skip to content
+      </a>
+      <main id="main" className="flex-1 pb-24 md:pb-12">
+        {children}
+      </main>
 
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg-canvas)]/95 backdrop-blur-md border-t border-[var(--border-subtle)] flex items-center justify-around z-50 px-1">

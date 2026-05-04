@@ -9,6 +9,7 @@ import {
 } from "react";
 import { Download } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 import type { DiagnosisData, DiagnosisCitation } from "@/services/supabase/types";
 
 const TYPEWRITER_CPS = 65; // chars per second; ~tasteful pace, faster than 20cps
@@ -51,7 +52,8 @@ export function DiagnosisDocument({
     }
   });
 
-  const shouldTypewrite = typewriter && !hasSeen;
+  const reducedMotion = useReducedMotion();
+  const shouldTypewrite = typewriter && !hasSeen && !reducedMotion;
 
   const total = data.prose.length;
   const [revealed, setRevealed] = useState<number>(

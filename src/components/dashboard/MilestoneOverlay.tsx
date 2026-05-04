@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { Milestone } from "@/lib/milestones";
 
@@ -35,10 +35,26 @@ export function MilestoneOverlay({
     });
   };
 
+  // Esc to dismiss (also marks as seen — same as button)
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") dismiss();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] bg-[var(--bg-canvas)]/97 backdrop-blur-md flex items-center justify-center px-6">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="milestone-title"
+      className="fixed inset-0 z-[60] bg-[var(--bg-canvas)]/97 backdrop-blur-md flex items-center justify-center px-6"
+    >
       {/* Soft oxblood ambient */}
       <div
         aria-hidden
@@ -59,7 +75,7 @@ export function MilestoneOverlay({
         <div className="font-mono text-[0.6875rem] tracking-[0.18em] uppercase text-[var(--accent-base)] mb-5">
           {milestone.kicker}
         </div>
-        <h1 className="font-serif text-[2rem] md:text-[2.625rem] leading-[1.08] tracking-[-0.02em] text-[var(--text-primary)] mb-6">
+        <h1 id="milestone-title" className="font-serif text-[2rem] md:text-[2.625rem] leading-[1.08] tracking-[-0.02em] text-[var(--text-primary)] mb-6">
           {milestone.title}
         </h1>
         <p className="font-sans text-[1rem] md:text-[1.125rem] leading-[1.7] text-[var(--text-secondary)] max-w-prose mb-9">

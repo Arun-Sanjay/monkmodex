@@ -12,9 +12,17 @@ export function PublicLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-[6px] focus:bg-[var(--accent-base)] focus:text-[var(--text-primary)] focus:font-mono focus:text-[0.6875rem] focus:tracking-[0.18em] focus:uppercase"
+      >
+        Skip to content
+      </a>
       {showNav ? <PillNav /> : null}
 
-      <main className="flex-1">{children}</main>
+      <main id="main" className="flex-1">
+        {children}
+      </main>
 
       <footer className="border-t border-[var(--border-subtle)] mt-12">
         <div className="max-w-7xl mx-auto px-6 md:px-8 py-12 flex flex-col md:flex-row gap-6 md:gap-12 justify-between items-start md:items-center">
