@@ -1,12 +1,14 @@
 /**
  * POST /api/checkins
  *
- * Upsert the user's daily check-in. Identified via session_token cookie.
+ * Upsert the user's daily check-in. Identified by Owner — authed user_id
+ * if signed in, otherwise the session_token cookie.
  */
 
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSessionToken } from "@/services/session";
+import { resolveOwner } from "@/services/owner";
 import {
   upsertCheckin,
   getActiveProtocol,
@@ -15,9 +17,6 @@ import {
 
 export const runtime = "nodejs";
 
-// Both fields are optional so the client can patch one without clobbering
-// the other. `null` on journalText explicitly clears it; omitting leaves
-// the existing value alone.
 const RequestSchema = z.object({
   protocolId: z.string().uuid(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -38,17 +37,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  const sessionToken = await getSessionToken();
-  if (!sessionToken) {
+  const owner = await resolveOwner();
+  if (!owner) {
     return NextResponse.json({ error: "No session" }, { status: 401 });
   }
 
-  const protocol = await getActiveProtocol(sessionToken);
+  // We need a session_token for the row's NOT NULL column. If the user is
+  // authed without a cookie (rare), this call mints one.
+  const sessionToken =
+    (await getSessionToken()) ??
+    (owner.kind === "session" ? owner.sessionToken : "");
+
+  const protocol = await getActiveProtocol(owner);
   if (!protocol || protocol.id !== parsed.data.protocolId) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const existing = await getCheckinByDate(sessionToken, parsed.data.date);
+  const existing = await getCheckinByDate(owner, parsed.data.date);
   const completedItems =
     parsed.data.completedItems ?? existing?.completed_items ?? [];
   const journalText =
@@ -57,7 +62,8 @@ export async function POST(req: Request) {
       : (existing?.journal_text ?? null);
 
   const row = await upsertCheckin({
-    sessionToken,
+    owner,
+    sessionToken: sessionToken || protocol.session_token,
     protocolId: parsed.data.protocolId,
     date: parsed.data.date,
     completedItems,

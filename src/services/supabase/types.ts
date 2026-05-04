@@ -32,6 +32,7 @@ export type DiagnosisData = {
 export type QuizResponseRow = {
   id: string;
   session_token: string;
+  user_id: string | null;
   responses: Record<string, unknown>;
   diagnosis_text: string | null;
   diagnosis_data: DiagnosisData | null;
@@ -52,6 +53,7 @@ export type QuizResponseRow = {
 export type QuizResponseInsert = {
   id?: string;
   session_token: string;
+  user_id?: string | null;
   responses: Record<string, unknown>;
   diagnosis_text?: string | null;
   diagnosis_data?: DiagnosisData | null;
@@ -74,6 +76,7 @@ export type QuizResponseUpdate = Partial<QuizResponseInsert>;
 export type ProtocolRow = {
   id: string;
   session_token: string;
+  user_id: string | null;
   quiz_response_id: string;
   tier: Tier;
   duration_days: 30 | 90;
@@ -88,6 +91,7 @@ export type ProtocolRow = {
 export type ProtocolInsert = {
   id?: string;
   session_token: string;
+  user_id?: string | null;
   quiz_response_id: string;
   tier: Tier;
   duration_days: 30 | 90;
@@ -104,6 +108,7 @@ export type ProtocolUpdate = Partial<ProtocolInsert>;
 export type CheckinRow = {
   id: string;
   session_token: string;
+  user_id: string | null;
   protocol_id: string;
   date: string;
   completed_items: string[];
@@ -118,6 +123,7 @@ export type CheckinRow = {
 export type CheckinInsert = {
   id?: string;
   session_token: string;
+  user_id?: string | null;
   protocol_id: string;
   date: string;
   completed_items?: string[];

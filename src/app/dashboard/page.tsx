@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { getSessionToken } from "@/services/session";
+import { resolveOwner } from "@/services/owner";
 import {
   getActiveProtocol,
   getCheckinByDate,
@@ -22,10 +22,10 @@ import { dayNumber, todayDateString, formatShortDate } from "@/lib/date";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardTodayPage() {
-  const sessionToken = await getSessionToken();
-  if (!sessionToken) redirect("/diagnostic");
+  const owner = await resolveOwner();
+  if (!owner) redirect("/diagnostic");
 
-  const protocol = await getActiveProtocol(sessionToken);
+  const protocol = await getActiveProtocol(owner);
   if (!protocol) redirect("/diagnostic");
 
   const parsed = parseProtocolData(protocol.protocol_data);
@@ -51,7 +51,7 @@ export default async function DashboardTodayPage() {
   }
 
   const today = todayDateString();
-  const todayCheckin = await getCheckinByDate(sessionToken, today);
+  const todayCheckin = await getCheckinByDate(owner, today);
   const recentCheckins = await getCheckinsForProtocol(protocol.id);
 
   const day = dayNumber(protocol.start_date, today);

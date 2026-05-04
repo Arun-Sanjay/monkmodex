@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { getSessionToken } from "@/services/session";
+import { resolveOwner } from "@/services/owner";
 import {
   getActiveProtocol,
   getCheckinsForProtocol,
@@ -16,10 +16,10 @@ import { JournalEditor } from "@/components/dashboard/JournalEditor";
 export const dynamic = "force-dynamic";
 
 export default async function JournalPage() {
-  const sessionToken = await getSessionToken();
-  if (!sessionToken) redirect("/diagnostic");
+  const owner = await resolveOwner();
+  if (!owner) redirect("/diagnostic");
 
-  const protocol = await getActiveProtocol(sessionToken);
+  const protocol = await getActiveProtocol(owner);
   if (!protocol) redirect("/diagnostic");
 
   const checkins = await getCheckinsForProtocol(protocol.id);

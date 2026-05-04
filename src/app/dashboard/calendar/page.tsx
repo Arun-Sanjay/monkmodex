@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getSessionToken } from "@/services/session";
+import { resolveOwner } from "@/services/owner";
 import {
   getActiveProtocol,
   getCheckinsForProtocol,
@@ -16,10 +16,10 @@ import { parseProtocolData } from "@/lib/protocol/extract";
 export const dynamic = "force-dynamic";
 
 export default async function CalendarPage() {
-  const sessionToken = await getSessionToken();
-  if (!sessionToken) redirect("/diagnostic");
+  const owner = await resolveOwner();
+  if (!owner) redirect("/diagnostic");
 
-  const protocol = await getActiveProtocol(sessionToken);
+  const protocol = await getActiveProtocol(owner);
   if (!protocol) redirect("/diagnostic");
 
   const parsed = parseProtocolData(protocol.protocol_data);

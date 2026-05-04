@@ -12,6 +12,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSessionToken } from "@/services/session";
+import { resolveOwner } from "@/services/owner";
 import { scoreQuiz } from "@/lib/quiz/scoring";
 import { generateProtocol } from "@/services/anthropic/generate-protocol";
 import {
@@ -103,8 +104,10 @@ export async function POST(req: Request) {
   }
 
   const startDate = new Date().toISOString().split("T")[0];
+  const owner = (await resolveOwner()) ?? { kind: "session" as const, sessionToken };
 
   const inserted = await insertProtocol({
+    owner,
     sessionToken,
     quizResponseId: responseId,
     tier,

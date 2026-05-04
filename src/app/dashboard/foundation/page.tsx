@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { Sunrise, Sun, Sunset, Moon, Check } from "lucide-react";
-import { getSessionToken } from "@/services/session";
+import { resolveOwner } from "@/services/owner";
 import { getActiveProtocol } from "@/services/supabase/queries";
 import {
   DashboardLayout,
@@ -90,10 +90,10 @@ function buildPhases(durationDays: number): Phase[] {
 }
 
 export default async function FoundationPage() {
-  const sessionToken = await getSessionToken();
-  if (!sessionToken) redirect("/diagnostic");
+  const owner = await resolveOwner();
+  if (!owner) redirect("/diagnostic");
 
-  const protocol = await getActiveProtocol(sessionToken);
+  const protocol = await getActiveProtocol(owner);
   if (!protocol) redirect("/diagnostic");
 
   const parsed = parseProtocolData(protocol.protocol_data);

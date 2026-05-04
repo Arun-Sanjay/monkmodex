@@ -12,7 +12,7 @@
 
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getSessionToken } from "@/services/session";
+import { resolveOwner } from "@/services/owner";
 import { scoreQuiz } from "@/lib/quiz/scoring";
 import {
   getQuizResponseById,
@@ -41,8 +41,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  const sessionToken = await getSessionToken();
-  if (!sessionToken) {
+  const owner = await resolveOwner();
+  if (!owner) {
     return NextResponse.json({ error: "No session" }, { status: 401 });
   }
 
@@ -50,7 +50,13 @@ export async function POST(req: Request) {
   if (!row) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
-  if (row.session_token !== sessionToken) {
+
+  // Authorization: row must belong to this owner
+  const ownsRow =
+    owner.kind === "user"
+      ? row.user_id === owner.userId
+      : row.user_id === null && row.session_token === owner.sessionToken;
+  if (!ownsRow) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

@@ -15,6 +15,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getOrCreateSessionToken } from "@/services/session";
+import { resolveOrCreateOwner } from "@/services/owner";
 import { scoreQuiz } from "@/lib/quiz/scoring";
 import { insertQuizResponse, setDiagnosisData } from "@/services/supabase/queries";
 import { generateDiagnosisData } from "@/services/anthropic/generate-diagnosis";
@@ -50,9 +51,11 @@ export async function POST(req: Request) {
   const scoring = scoreQuiz(responses as Parameters<typeof scoreQuiz>[0]);
 
   const sessionToken = await getOrCreateSessionToken();
+  const owner = await resolveOrCreateOwner();
 
   // 1. Persist the quiz response with flags (no diagnosis yet).
   const row = await insertQuizResponse({
+    owner,
     sessionToken,
     responses,
     flags: {

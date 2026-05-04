@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import type { ReactNode } from "react";
-import { getSessionToken } from "@/services/session";
+import { LogIn, LogOut } from "lucide-react";
+import { resolveOwner } from "@/services/owner";
+import { getAuthUser } from "@/services/supabase/auth-server";
 import { getActiveProtocol } from "@/services/supabase/queries";
 import {
   DashboardLayout,
@@ -14,11 +17,13 @@ import { formatShortDate } from "@/lib/date";
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
-  const sessionToken = await getSessionToken();
-  if (!sessionToken) redirect("/diagnostic");
+  const owner = await resolveOwner();
+  if (!owner) redirect("/diagnostic");
 
-  const protocol = await getActiveProtocol(sessionToken);
+  const protocol = await getActiveProtocol(owner);
   if (!protocol) redirect("/diagnostic");
+
+  const authUser = await getAuthUser();
 
   return (
     <DashboardLayout>
@@ -27,11 +32,38 @@ export default async function SettingsPage() {
         <Section
           kicker="Settings"
           title="Account."
-          description="Read-only for now. Auth and account management land in the shippable build."
+          description={
+            authUser
+              ? "Signed in. Your protocol is saved to this account."
+              : "Anonymous session. Sign in to save your protocol across devices."
+          }
         />
 
         <Panel tone="default">
           <div className="divide-y divide-[var(--border-subtle)]">
+            <Field
+              label="Account"
+              value={
+                authUser ? (
+                  <span className="font-serif text-[1.0625rem] tracking-[-0.005em] text-[var(--text-primary)]">
+                    {authUser.email ?? "Signed in"}
+                  </span>
+                ) : (
+                  <Link
+                    href="/sign-in?next=/dashboard/settings"
+                    className="inline-flex items-center gap-2 font-mono text-[0.6875rem] tracking-[0.18em] uppercase px-3 py-2 rounded-[5px] bg-[var(--accent-base)] hover:bg-[var(--accent-hover)] text-[var(--text-primary)] transition-colors"
+                  >
+                    <LogIn size={12} strokeWidth={2} />
+                    Sign in to save
+                  </Link>
+                )
+              }
+              meta={
+                authUser
+                  ? "Magic-link auth. No password to remember."
+                  : "Anonymous data lives in a cookie on this device."
+              }
+            />
             <Field
               label="Tier"
               value={
@@ -55,7 +87,9 @@ export default async function SettingsPage() {
               value={
                 protocol.identity_statement ? (
                   <span className="font-serif italic text-[1.0625rem] leading-[1.5] text-[var(--text-primary)]">
-                    {protocol.identity_statement.replace(/^…|^\.\.\./, "").trim()}
+                    {protocol.identity_statement
+                      .replace(/^…|^\.\.\./, "")
+                      .trim()}
                   </span>
                 ) : (
                   <span className="font-sans text-[var(--text-tertiary)]">
@@ -64,15 +98,23 @@ export default async function SettingsPage() {
                 )
               }
             />
-            <Field
-              label="Session"
-              value={
-                <code className="font-mono text-[0.875rem] text-[var(--text-secondary)] tabular-nums">
-                  {sessionToken.slice(0, 8)}…{sessionToken.slice(-4)}
-                </code>
-              }
-              meta="Dev mode — your data ties to a session token in a cookie."
-            />
+            {authUser ? (
+              <Field
+                label="Sign out"
+                value={
+                  <form action="/auth/sign-out" method="post">
+                    <button
+                      type="submit"
+                      className="inline-flex items-center gap-2 font-mono text-[0.6875rem] tracking-[0.18em] uppercase px-3 py-2 rounded-[5px] border border-[var(--border-subtle)] hover:border-[var(--border-strong)] hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                    >
+                      <LogOut size={12} strokeWidth={2} />
+                      Sign out
+                    </button>
+                  </form>
+                }
+                meta="You'll stay on this device, but won't be able to edit your protocol until you sign in again."
+              />
+            ) : null}
           </div>
         </Panel>
       </DashboardPage>
