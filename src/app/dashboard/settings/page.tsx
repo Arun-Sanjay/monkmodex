@@ -12,6 +12,10 @@ import {
 import { IdentityHeader } from "@/components/dashboard/IdentityHeader";
 import { Section } from "@/components/dashboard/Section";
 import { Panel } from "@/components/dashboard/Panel";
+import {
+  ExportButton,
+  WipeButton,
+} from "@/components/dashboard/AccountActions";
 import { formatShortDate } from "@/lib/date";
 
 export const dynamic = "force-dynamic";
@@ -99,6 +103,16 @@ export default async function SettingsPage() {
                   </span>
                 )
               }
+            />
+            <Field
+              label="Export"
+              value={<ExportButton />}
+              meta="Download every row this account holds — JSON, machine-readable, includes diagnosis, protocol, check-ins, lapses."
+            />
+            <Field
+              label="Delete"
+              value={<WipeButton />}
+              meta="Hard delete. No recovery. Run it before you walk away if you want a clean exit."
             />
             {authUser ? (
               <Field

@@ -23,6 +23,9 @@ import {
 } from "@/services/supabase/queries";
 import { TIER_DURATION_DAYS } from "@/lib/constants";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { getAuthUser } from "@/services/supabase/auth-server";
+import { sendEmail } from "@/services/email/resend";
+import { orderConfirmation } from "@/services/email/templates";
 import type { QuizResponses } from "@/lib/quiz/schema";
 
 export const runtime = "nodejs";
@@ -144,6 +147,29 @@ export async function POST(req: Request) {
   });
 
   await setUnlockTier(responseId, tier);
+
+  // Fire-and-forget order confirmation if the user is authed and we have
+  // an email. No-op when RESEND_API_KEY is missing.
+  const authUser = await getAuthUser();
+  if (authUser?.email) {
+    const appUrl =
+      process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const tmpl = orderConfirmation({
+      email: authUser.email,
+      tier,
+      durationDays: TIER_DURATION_DAYS[tier],
+      amountUsd: tier === "operator" ? 39 : 19,
+      protocolUrl: `${appUrl}/dashboard`,
+      diagnosisUrl: `${appUrl}/dashboard/diagnosis`,
+    });
+    void sendEmail({
+      to: authUser.email,
+      subject: tmpl.subject,
+      html: tmpl.html,
+      text: tmpl.text,
+      category: "order_confirmation",
+    }).catch((e) => console.error("order confirmation send failed:", e));
+  }
 
   return NextResponse.json({
     ok: true,

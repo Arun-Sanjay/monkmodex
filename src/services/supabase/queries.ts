@@ -11,7 +11,7 @@
 
 import { getServiceClient } from "./server";
 import type { Owner } from "@/services/owner";
-import type { CheckinRow, ProtocolRow, QuizResponseRow, Tier } from "./types";
+import type { CheckinRow, LapseRow, ProtocolRow, QuizResponseRow, Tier } from "./types";
 
 /* ============================================
  * QUIZ RESPONSES
@@ -324,12 +324,77 @@ export async function getCheckinByDate(
 }
 
 /* ============================================
+ * LAPSES
+ * ============================================ */
+export async function insertLapse(input: {
+  owner: Owner;
+  sessionToken: string;
+  protocolId: string;
+  cutTarget: string;
+  trigger?: string | null;
+  thirtyMinBefore?: string | null;
+  notes?: string | null;
+}): Promise<LapseRow> {
+  const supabase = getServiceClient();
+  const { data, error } = await supabase
+    .from("lapses")
+    .insert({
+      session_token: input.sessionToken,
+      user_id: input.owner.kind === "user" ? input.owner.userId : null,
+      protocol_id: input.protocolId,
+      cut_target: input.cutTarget,
+      trigger: input.trigger ?? null,
+      thirty_min_before: input.thirtyMinBefore ?? null,
+      notes: input.notes ?? null,
+    })
+    .select()
+    .single();
+  if (error || !data) {
+    throw new Error(`Failed to insert lapse: ${error?.message ?? "unknown"}`);
+  }
+  return data;
+}
+
+export async function listLapsesForProtocol(
+  protocolId: string
+): Promise<LapseRow[]> {
+  const supabase = getServiceClient();
+  const { data, error } = await supabase
+    .from("lapses")
+    .select("*")
+    .eq("protocol_id", protocolId)
+    .order("occurred_at", { ascending: false });
+  if (error) throw new Error(`Failed to fetch lapses: ${error.message}`);
+  return data ?? [];
+}
+
+export async function listLapsesForCut(
+  protocolId: string,
+  cutTarget: string
+): Promise<LapseRow[]> {
+  const supabase = getServiceClient();
+  const { data, error } = await supabase
+    .from("lapses")
+    .select("*")
+    .eq("protocol_id", protocolId)
+    .eq("cut_target", cutTarget)
+    .order("occurred_at", { ascending: false });
+  if (error) throw new Error(`Failed to fetch lapses: ${error.message}`);
+  return data ?? [];
+}
+
+/* ============================================
  * CLAIM — bind anonymous session_token rows to a user
  * ============================================ */
 export async function claimSessionForUser(
   sessionToken: string,
   userId: string
-): Promise<{ quiz_responses: number; protocols: number; checkins: number }> {
+): Promise<{
+  quiz_responses: number;
+  protocols: number;
+  checkins: number;
+  lapses: number;
+}> {
   const supabase = getServiceClient();
 
   const qr = await supabase
@@ -356,10 +421,19 @@ export async function claimSessionForUser(
     .select("id");
   if (c.error) throw new Error(`Claim checkins failed: ${c.error.message}`);
 
+  const l = await supabase
+    .from("lapses")
+    .update({ user_id: userId })
+    .eq("session_token", sessionToken)
+    .is("user_id", null)
+    .select("id");
+  if (l.error) throw new Error(`Claim lapses failed: ${l.error.message}`);
+
   return {
     quiz_responses: qr.data?.length ?? 0,
     protocols: p.data?.length ?? 0,
     checkins: c.data?.length ?? 0,
+    lapses: l.data?.length ?? 0,
   };
 }
 
@@ -370,6 +444,7 @@ export async function exportOwnerData(owner: Owner): Promise<{
   quiz_responses: QuizResponseRow[];
   protocols: ProtocolRow[];
   checkins: CheckinRow[];
+  lapses: LapseRow[];
 }> {
   const supabase = getServiceClient();
   const filterFor = (q: ReturnType<typeof supabase.from>) => {
@@ -377,20 +452,23 @@ export async function exportOwnerData(owner: Owner): Promise<{
     return q.eq("session_token", owner.sessionToken).is("user_id", null);
   };
 
-  const [qr, pr, cr] = await Promise.all([
+  const [qr, pr, cr, lr] = await Promise.all([
     filterFor(supabase.from("quiz_responses").select("*")),
     filterFor(supabase.from("protocols").select("*")),
     filterFor(supabase.from("checkins").select("*")),
+    filterFor(supabase.from("lapses").select("*")),
   ]);
 
   if (qr.error) throw new Error(qr.error.message);
   if (pr.error) throw new Error(pr.error.message);
   if (cr.error) throw new Error(cr.error.message);
+  if (lr.error) throw new Error(lr.error.message);
 
   return {
     quiz_responses: qr.data ?? [],
     protocols: pr.data ?? [],
     checkins: cr.data ?? [],
+    lapses: lr.data ?? [],
   };
 }
 
@@ -404,7 +482,10 @@ export async function wipeOwnerData(owner: Owner): Promise<void> {
     return q.eq("session_token", owner.sessionToken).is("user_id", null);
   };
 
-  // Delete checkins, then protocols, then quiz_responses (FK order)
+  // FK-safe order: lapses → checkins → protocols → quiz_responses
+  const l = await filterFor(supabase.from("lapses").delete());
+  if (l.error) throw new Error(`Wipe lapses: ${l.error.message}`);
+
   const c = await filterFor(supabase.from("checkins").delete());
   if (c.error) throw new Error(`Wipe checkins: ${c.error.message}`);
 

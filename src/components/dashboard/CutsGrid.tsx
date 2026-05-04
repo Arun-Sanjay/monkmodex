@@ -8,6 +8,7 @@ import type { Cut } from "@/lib/protocol/types";
 import { Panel, PanelBody, PanelDivider } from "./Panel";
 import { ProgressBar } from "./ProgressBar";
 import { cutSlug } from "./CutsStrip";
+import { LapseLogger } from "./LapseLogger";
 
 /**
  * CutsGrid — 2x2 layout of cut cells. Click a cell to expand it across
@@ -17,9 +18,11 @@ import { cutSlug } from "./CutsStrip";
 export function CutsGrid({
   cuts,
   dayInProtocol,
+  protocolId,
 }: {
   cuts: Cut[];
   dayInProtocol: number;
+  protocolId: string;
 }) {
   const params = useSearchParams();
   const router = useRouter();
@@ -58,6 +61,7 @@ export function CutsGrid({
               <ExpandedCard
                 cut={cell.cut}
                 dayInProtocol={dayInProtocol}
+                protocolId={protocolId}
                 onCollapse={() => setExpanded(null)}
               />
             ) : (
@@ -135,10 +139,12 @@ function CollapsedCard({
 function ExpandedCard({
   cut,
   dayInProtocol,
+  protocolId,
   onCollapse,
 }: {
   cut: Cut;
   dayInProtocol: number;
+  protocolId: string;
   onCollapse: () => void;
 }) {
   const elapsed = Math.min(dayInProtocol, cut.abstinence_days);
@@ -244,6 +250,12 @@ function ExpandedCard({
             </div>
           ))}
         </div>
+      </PanelBody>
+
+      <PanelDivider />
+
+      <PanelBody className="pt-6 md:pt-7">
+        <LapseLogger protocolId={protocolId} cutTarget={cut.target} />
       </PanelBody>
     </Panel>
   );

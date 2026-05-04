@@ -12,11 +12,15 @@ import { IdentityHeader } from "@/components/dashboard/IdentityHeader";
 import { TodayCheckIn } from "@/components/dashboard/TodayCheckIn";
 import { TodayJournal } from "@/components/dashboard/TodayJournal";
 import { CutsStrip } from "@/components/dashboard/CutsStrip";
+import { DailyBriefing } from "@/components/dashboard/DailyBriefing";
+import { MilestoneOverlay } from "@/components/dashboard/MilestoneOverlay";
 import { Panel } from "@/components/dashboard/Panel";
 import { ProgressRing } from "@/components/dashboard/ProgressRing";
 import { Section } from "@/components/dashboard/Section";
 import { Stat } from "@/components/dashboard/Stat";
 import { parseProtocolData } from "@/lib/protocol/extract";
+import { composeBriefing } from "@/lib/briefing";
+import { getMilestoneForDay } from "@/lib/milestones";
 import { dayNumber, todayDateString, formatShortDate } from "@/lib/date";
 
 export const dynamic = "force-dynamic";
@@ -76,8 +80,38 @@ export default async function DashboardTodayPage() {
 
   const daysRemaining = Math.max(0, protocol.duration_days - day + 1);
 
+  // Briefing: how many of the last 7 prior days had a check-in
+  const last7PriorPossible = Math.max(0, Math.min(7, day - 1));
+  const last7PriorDone = recentCheckins
+    .filter((c) => c.date < today)
+    .slice(0, 7)
+    .filter((c) => c.completed_items.length > 0).length;
+
+  const briefingPhaseLabel =
+    day <= 14 ? "Substrate" : day <= 42 ? "Body Reset" : "Mind Reset";
+
+  const briefing = composeBriefing({
+    day,
+    totalDays: protocol.duration_days,
+    completedToday,
+    totalNN,
+    last7Done: last7PriorDone,
+    last7Possible: last7PriorPossible,
+    phaseLabel: briefingPhaseLabel,
+    todayStarted: completedToday > 0,
+  });
+
+  // Milestone interstitial — fires once per day-N (1, 14, 30, 90)
+  const milestone = getMilestoneForDay(day, protocol.tier, protocol.duration_days);
+  const showMilestone =
+    milestone !== null &&
+    !(protocol.milestones_seen ?? []).includes(milestone.day);
+
   return (
     <DashboardLayout>
+      {showMilestone && milestone ? (
+        <MilestoneOverlay milestone={milestone} protocolId={protocol.id} />
+      ) : null}
       <IdentityHeader
         identityStatement={protocol.identity_statement}
         right={
@@ -127,6 +161,9 @@ export default async function DashboardTodayPage() {
             </div>
           </div>
         </Panel>
+
+        {/* Daily briefing — quiet, contextual */}
+        <DailyBriefing text={briefing} />
 
         {/* Today's non-negotiables */}
         <Section

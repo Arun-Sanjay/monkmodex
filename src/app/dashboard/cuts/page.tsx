@@ -51,7 +51,11 @@ export default async function CutsPage() {
           </Panel>
         ) : (
           <Suspense fallback={null}>
-            <CutsGrid cuts={parsed.cuts} dayInProtocol={dayInto} />
+            <CutsGrid
+              cuts={parsed.cuts}
+              dayInProtocol={dayInto}
+              protocolId={protocol.id}
+            />
           </Suspense>
         )}
       </DashboardPage>

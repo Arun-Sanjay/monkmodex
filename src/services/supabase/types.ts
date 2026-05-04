@@ -86,6 +86,7 @@ export type ProtocolRow = {
   generated_at: string;
   activated_at: string | null;
   version: number;
+  milestones_seen: number[];
 };
 
 export type ProtocolInsert = {
@@ -101,6 +102,7 @@ export type ProtocolInsert = {
   generated_at?: string;
   activated_at?: string | null;
   version?: number;
+  milestones_seen?: number[];
 };
 
 export type ProtocolUpdate = Partial<ProtocolInsert>;
@@ -136,6 +138,32 @@ export type CheckinInsert = {
 };
 
 export type CheckinUpdate = Partial<CheckinInsert>;
+
+export type LapseRow = {
+  id: string;
+  session_token: string;
+  user_id: string | null;
+  protocol_id: string;
+  cut_target: string;
+  occurred_at: string;
+  trigger: string | null;
+  thirty_min_before: string | null;
+  notes: string | null;
+  created_at: string;
+};
+export type LapseInsert = {
+  id?: string;
+  session_token: string;
+  user_id?: string | null;
+  protocol_id: string;
+  cut_target: string;
+  occurred_at?: string;
+  trigger?: string | null;
+  thirty_min_before?: string | null;
+  notes?: string | null;
+  created_at?: string;
+};
+export type LapseUpdate = Partial<LapseInsert>;
 
 export type RateLimitBucketRow = {
   bucket_key: string;
@@ -175,6 +203,12 @@ export type Database = {
         Row: RateLimitBucketRow;
         Insert: RateLimitBucketInsert;
         Update: RateLimitBucketUpdate;
+        Relationships: [];
+      };
+      lapses: {
+        Row: LapseRow;
+        Insert: LapseInsert;
+        Update: LapseUpdate;
         Relationships: [];
       };
     };

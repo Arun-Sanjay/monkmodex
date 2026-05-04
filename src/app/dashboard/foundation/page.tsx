@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { Sunrise, Sun, Sunset, Moon, Check } from "lucide-react";
+import { Sunrise, Sun, Sunset, Moon, Check, Download } from "lucide-react";
 import { resolveOwner } from "@/services/owner";
 import { getActiveProtocol } from "@/services/supabase/queries";
 import {
@@ -124,6 +124,17 @@ export default async function FoundationPage() {
           kicker="Foundation"
           title="The path you&rsquo;re walking."
           description="Three phases, sequential. Substrate first; everything else compounds on top. You're on whichever phase your day count puts you in — the rest of this page shows that phase in detail."
+          right={
+            <a
+              href="/dashboard/foundation/print"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 font-mono text-[0.6875rem] tracking-[0.18em] uppercase text-[var(--text-secondary)] hover:text-[var(--accent-base)] transition-colors"
+            >
+              <Download size={11} strokeWidth={2} />
+              Download PDF
+            </a>
+          }
         />
 
         <PhaseLadder phases={phases} day={day} currentIdx={currentIdx} />
